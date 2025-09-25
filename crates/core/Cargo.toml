@@ -1,0 +1,11 @@
+[package]
+name = "core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+log = { workspace = true }
+ropey = { workspace = true }
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["rt"] }
+tokio-stream = { workspace = true }

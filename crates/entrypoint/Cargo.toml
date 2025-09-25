@@ -1,0 +1,13 @@
+[package]
+name = "entrypoint"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+app = { workspace = true }
+frontend-gui = { workspace = true }
+
+tokio = { workspace = true, features = ["macros"] }
+anyhow = { workspace = true }
+
+env_logger = "0.11"

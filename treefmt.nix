@@ -4,9 +4,9 @@
   projectRootFile = "flake.nix";
 
   programs.nixfmt.enable = true;
-
+  programs.taplo.enable = true; # toml
   programs.rustfmt = {
     enable = true;
-    edition = (lib.importTOML ./Cargo.toml).package.edition;
+    edition = "2024";
   };
 }

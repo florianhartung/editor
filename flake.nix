@@ -43,6 +43,7 @@
           ];
         };
         treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+
       in
       {
         git.hooks = {
@@ -60,6 +61,22 @@
               rust-toolchain
               rust-analyzer
               cargo-expand
+            ];
+
+            env = [
+              {
+                name = "LD_LIBRARY_PATH";
+                value =
+                  with pkgs;
+                  lib.makeLibraryPath [
+                    # https://eu90h.com/wgpu-winit-and-nixos.html
+
+                    libGL
+                    libxkbcommon
+                    wayland
+                    vulkan-loader
+                  ];
+              }
             ];
           }
         );

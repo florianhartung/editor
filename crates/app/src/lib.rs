@@ -2,15 +2,15 @@
 //! It calls the core with a specific frontend.
 
 use anyhow::Result;
-use core::communication::{Action, EditorEvent, Event};
+use core::communication::{Action, EditorEvent, Event, KeyNamed};
 use core::frontend::Frontend;
-use log::info;
 use ropey::Rope;
 use tokio::sync::mpsc;
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-pub fn run<F: Frontend>() -> Result<()> {
+#[tokio::main]
+pub async fn run<F: Frontend>() -> Result<()> {
     let mut editor = Editor::new();
 
     // These are the two main communication channels
@@ -21,18 +21,24 @@ pub fn run<F: Frontend>() -> Result<()> {
     tokio::task::spawn(async move {
         let mut receive_event = UnboundedReceiverStream::new(receive_event);
         while let Some(event) = receive_event.next().await {
+            log::debug!("handling event {event:?}");
             match event {
-                Event::Editor(ee @ EditorEvent::KeyPress(c)) => {
-                    info!("handling event {ee:?}");
-                    editor
-                        .buffer
-                        .rope
-                        .insert_char(editor.buffer.rope.len_chars(), c);
+                Event::Editor(EditorEvent::KeyPress(key)) => {
+                    match key {
+                        core::communication::Key::Named(KeyNamed::Escape) => {
+                            todo!()
+                        }
+                        core::communication::Key::Char(c) => {
+                            editor
+                                .buffer
+                                .rope
+                                .insert_char(editor.buffer.rope.len_chars(), c);
+
+                            let _ = send_action.send(Action::Insert(c));
+                        }
+                    }
 
                     // editor.perform(&action);
-                    if send_action.send(Action::Insert(c)).is_err() {
-                        log::debug!("frontend action receiver is dropped");
-                    }
                 }
             }
         }

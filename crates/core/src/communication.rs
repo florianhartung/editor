@@ -10,7 +10,18 @@ pub enum Event {
 
 #[derive(Debug, Clone)]
 pub enum EditorEvent {
-    KeyPress(char),
+    KeyPress(Key),
+}
+
+#[derive(Debug, Clone)]
+pub enum Key {
+    Named(KeyNamed),
+    Char(char),
+}
+
+#[derive(Debug, Clone)]
+pub enum KeyNamed {
+    Escape
 }
 
 /// Actions are emitted by the core to the editor state and the frontend.

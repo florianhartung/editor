@@ -35,7 +35,7 @@ pub async fn run<F: Frontend>() -> Result<()> {
         }
     });
 
-    F::run(send_event, receive_action);
+    F::run(send_event, receive_action).await;
 
     Ok(())
 }

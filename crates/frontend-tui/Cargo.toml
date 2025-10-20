@@ -5,12 +5,14 @@ edition = "2024"
 
 [dependencies]
 core = { workspace = true }
-log = { workspace = true }
-tokio = { workspace = true, features = ["rt"] }
+
 anyhow = { workspace = true }
+log = { workspace = true }
+ropey = { workspace = true }
+tokio = { workspace = true, features = ["rt"] }
 
 tokio-stream = "0.1"
 tokio-executor = "0.1"
 ratatui = "0.29.0"
-color-eyre = "0.6.5"
-crossterm = "0.29.0"
+pollster = "0.4.0"
+# color-eyre = "0.6.5"

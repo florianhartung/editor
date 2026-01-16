@@ -2,7 +2,8 @@
 //! It calls the core with a specific frontend.
 
 use anyhow::Result;
-use core::communication::{Action, EditorEvent, Event, KeyNamed};
+use core::EventSender;
+use core::communication::{Action, EditorEvent, Event};
 use core::frontend::Frontend;
 use ropey::Rope;
 use std::fs::File;
@@ -15,13 +16,23 @@ use tokio::time::sleep;
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
+use crate::buffer::Buffer;
+use crate::motions::{HelixMotions, Motions, NonModalMotions};
+
+mod buffer;
+mod motions;
+
 #[tokio::main]
-pub async fn run<F: Frontend>() -> Result<()> {
+pub async fn run<F: Frontend>(post_init: impl FnOnce(&EventSender)) -> Result<()> {
     let mut editor = Editor::new();
 
     // These are the two main communication channels
     let (send_event, receive_event) = mpsc::unbounded_channel::<Event>();
     let (send_action, receive_action) = mpsc::unbounded_channel::<Action>();
+
+    let event_sender = EventSender::new(send_event);
+
+    post_init(&event_sender);
 
     // Spawn the backend main loop in a separate task
     tokio::task::spawn(async move {
@@ -35,13 +46,14 @@ pub async fn run<F: Frontend>() -> Result<()> {
         }
     });
 
-    F::run(send_event, receive_action).await;
+    F::run(event_sender, receive_action).await;
 
     Ok(())
 }
 
 #[derive(Debug)]
 pub struct Editor {
+    pub motions: Box<dyn Motions>,
     pub buffer: Buffer,
     // An index for the currently opened buffer into [`Self::buffers`].
     // If there are no buffers, the value of this is undefined.
@@ -50,8 +62,13 @@ pub struct Editor {
 
 impl Editor {
     fn new() -> Self {
+        let buffer = Buffer::default();
+        // let motions = Box::new(NonModalMotions::new(&buffer));
+        let motions = Box::new(HelixMotions::new(&buffer));
+
         Self {
-            buffer: Buffer::default(),
+            motions,
+            buffer,
             // buffers: vec![Buffer::default()],
             // current_buffer: 0,
         }
@@ -63,34 +80,32 @@ impl Editor {
         send_action: &UnboundedSender<Action>,
     ) -> Result<(), SendError<Action>> {
         match event {
-            Event::Editor(EditorEvent::KeyPress(key)) => {
-                match key {
-                    core::communication::Key::Named(KeyNamed::Escape) => {
-                        todo!()
-                    }
-                    core::communication::Key::Char(c) => {
-                        self.buffer
-                            .rope
-                            .insert_char(self.buffer.rope.len_chars(), c);
-
-                        send_action.send(Action::SetBufferContents(self.buffer.rope.clone()))?;
-                    }
-                }
-
-                // editor.perform(&action);
-            }
+            Event::Editor(editor_event) => self.handle_editor_event(editor_event, send_action)?,
             Event::OpenFile { path } => {
                 let path = PathBuf::from(path);
                 let file = File::open(&path).unwrap();
                 send_action.send(Action::HintBufferLoading)?;
 
-                self.buffer.rope = Rope::from_reader(BufReader::new(file)).unwrap();
-                sleep(Duration::from_secs(2)).await;
+                self.buffer = Buffer::new(Rope::from_reader(BufReader::new(file)).unwrap());
+                sleep(Duration::from_secs(1)).await;
 
-                send_action.send(Action::SetBuffer {
-                    contents: self.buffer.rope.clone(),
-                    title: path.file_name().unwrap().to_owned().into_string().unwrap(),
-                })?;
+                send_action.send(self.buffer.full_info_to_action())?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn handle_editor_event(
+        &mut self,
+        editor_event: EditorEvent,
+        send_action: &UnboundedSender<Action>,
+    ) -> Result<(), SendError<Action>> {
+        match editor_event {
+            EditorEvent::KeyPress(key) => {
+                self.motions
+                    .handle_key_press(&mut self.buffer, key, send_action)?;
+                // editor.perform(&action);
             }
         }
 
@@ -100,9 +115,4 @@ impl Editor {
     //     fn perform(&mut self, _action: &Action) {
     //         todo!();
     //     }
-}
-
-#[derive(Debug, Default)]
-pub struct Buffer {
-    rope: Rope,
 }

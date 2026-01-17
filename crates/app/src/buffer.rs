@@ -73,6 +73,26 @@ impl Buffer {
         self.rope.char_to_line(self.cursor_position)
     }
 
+    pub fn cursor_seek_next_word_start(&mut self, include_punctuation_in_words: bool) {
+        let chars_from_cursor = self.rope.chars_at(self.cursor_position);
+        let num_chars_to_skip = chars_from_cursor
+            .skip(1)
+            .scan(false, |found_whitespace, next| {
+                *found_whitespace |= next.is_whitespace()
+                    | (!include_punctuation_in_words && next.is_ascii_punctuation());
+
+                match (found_whitespace, next.is_whitespace()) {
+                    (true, true) => Some(next),
+                    (true, false) => None,
+                    (false, _) => Some(next),
+                }
+            })
+            .count();
+
+        let new_cursor_position = self.cursor_position + num_chars_to_skip;
+        self.cursor_position = new_cursor_position.min(self.rope.len_chars());
+    }
+
     pub fn insert_new_line(&mut self) {
         // TODO add support for different line endings
         self.insert_char('\n');

@@ -81,6 +81,14 @@ impl HelixMotions {
                 self.current_mode = Mode::Insert;
                 Ok(())
             }
+            Key::Char('w') => {
+                buffer.cursor_seek_next_word_start(false);
+                send_action.send(buffer.full_info_to_action())
+            }
+            Key::Char('W') => {
+                buffer.cursor_seek_next_word_start(true);
+                send_action.send(buffer.full_info_to_action())
+            }
             // TODO pretty much all other hotkeys
             _ => Ok(()),
         }

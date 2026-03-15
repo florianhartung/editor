@@ -25,5 +25,5 @@ fn main() -> anyhow::Result<()> {
         }
     };
 
-    app::run::<frontend_tui::Frontend>(post_init)
+    editor_app::run::<frontend_tui::Frontend>(post_init)
 }

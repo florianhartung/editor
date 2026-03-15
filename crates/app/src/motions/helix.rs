@@ -1,4 +1,4 @@
-use core::communication::{Action, Key, KeyNamed};
+use editor_core::communication::{Action, Key, KeyNamed};
 
 use tokio::sync::mpsc::{UnboundedSender, error::SendError};
 

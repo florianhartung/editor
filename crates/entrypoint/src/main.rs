@@ -1,4 +1,4 @@
-use core::EventSender;
+use editor_core::EventSender;
 use std::fs::File;
 
 use clap::Parser;

@@ -93,7 +93,7 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "core",
+ "editor-core",
  "log",
  "ropey",
  "tokio",
@@ -126,12 +126,6 @@ name = "bitflags"
 version = "2.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2261d10cca569e4643e526d8dc2e62e433cc8aba21ab764233731f8d369bf394"
-
-[[package]]
-name = "bytes"
-version = "1.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d71b6127be86fdcfddb610f7182ac57211d4b18a3e9c82eb2d17662f2227ad6a"
 
 [[package]]
 name = "cassowary"
@@ -221,17 +215,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "log",
- "ropey",
- "tokio",
- "tokio-stream",
-]
-
-[[package]]
 name = "crossbeam-utils"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -304,6 +287,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "editor-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "log",
+ "ropey",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -316,7 +310,7 @@ dependencies = [
  "anyhow",
  "app",
  "clap",
- "core",
+ "editor-core",
  "env_logger",
  "frontend-tui",
 ]
@@ -377,8 +371,8 @@ name = "frontend-tui"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "core",
  "crossterm",
+ "editor-core",
  "log",
  "pollster",
  "ratatui",
@@ -841,16 +835,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
-name = "socket2"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "233504af464074f9d066d7b5416c5f9b894a5862a6506e306f7b816cdd6f1807"
-dependencies = [
- "libc",
- "windows-sys 0.59.0",
-]
-
-[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -908,17 +892,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89e49afdadebb872d3145a5638b59eb0691ea23e46ca484037cfab3b76b95038"
 dependencies = [
  "backtrace",
- "bytes",
  "io-uring",
  "libc",
  "mio",
- "parking_lot",
  "pin-project-lite",
- "signal-hook-registry",
  "slab",
- "socket2",
  "tokio-macros",
- "windows-sys 0.59.0",
 ]
 
 [[package]]

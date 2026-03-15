@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-core.workspace = true
+editor-core.workspace = true
 
 anyhow.workspace = true
-tokio = { workspace = true, features = ["full"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 log.workspace = true
 ropey.workspace = true
 tokio-stream.workspace = true

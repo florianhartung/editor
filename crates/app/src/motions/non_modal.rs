@@ -1,4 +1,4 @@
-use core::communication::{Action, Key, KeyNamed};
+use editor_core::communication::{Action, Key, KeyNamed};
 
 use tokio::sync::mpsc::{UnboundedSender, error::SendError};
 
@@ -25,30 +25,30 @@ impl Motions for NonModalMotions {
         send_action: &UnboundedSender<Action>,
     ) -> Result<(), SendError<Action>> {
         match key {
-            core::communication::Key::Named(KeyNamed::Escape) => {
+            editor_core::communication::Key::Named(KeyNamed::Escape) => {
                 todo!()
             }
-            core::communication::Key::Named(KeyNamed::Backspace) => {
+            editor_core::communication::Key::Named(KeyNamed::Backspace) => {
                 buffer.remove_char();
                 send_action.send(buffer.full_info_to_action())?;
             }
-            core::communication::Key::Named(KeyNamed::Enter) => {
+            editor_core::communication::Key::Named(KeyNamed::Enter) => {
                 buffer.insert_new_line();
                 send_action.send(buffer.full_info_to_action())?;
             }
-            core::communication::Key::Named(KeyNamed::Tab) => {
+            editor_core::communication::Key::Named(KeyNamed::Tab) => {
                 let num_spaces_to_insert = 4 - buffer.current_cursor_position_column() % 4;
 
                 const SPACES: &str = "    ";
                 buffer.insert(&SPACES[0..num_spaces_to_insert]);
                 send_action.send(buffer.full_info_to_action())?;
             }
-            core::communication::Key::Char(c) => {
+            editor_core::communication::Key::Char(c) => {
                 buffer.insert_char(c);
 
                 send_action.send(buffer.full_info_to_action())?;
             }
-            core::communication::Key::Named(KeyNamed::Up) => {
+            editor_core::communication::Key::Named(KeyNamed::Up) => {
                 let line = buffer.current_cursor_position_line();
 
                 buffer.set_cursor_position_saturating(
@@ -57,18 +57,18 @@ impl Motions for NonModalMotions {
                 );
                 send_action.send(buffer.full_info_to_action())?;
             }
-            core::communication::Key::Named(KeyNamed::Down) => {
+            editor_core::communication::Key::Named(KeyNamed::Down) => {
                 let line = buffer.current_cursor_position_line();
 
                 buffer.set_cursor_position_saturating(line + 1, self.cursor_optimal_column);
                 send_action.send(buffer.full_info_to_action())?;
             }
-            core::communication::Key::Named(KeyNamed::Left) => {
+            editor_core::communication::Key::Named(KeyNamed::Left) => {
                 buffer.cursor_backward();
                 self.cursor_optimal_column = buffer.current_cursor_position_column();
                 send_action.send(buffer.full_info_to_action())?;
             }
-            core::communication::Key::Named(KeyNamed::Right) => {
+            editor_core::communication::Key::Named(KeyNamed::Right) => {
                 buffer.cursor_forward();
                 self.cursor_optimal_column = buffer.current_cursor_position_column();
                 send_action.send(buffer.full_info_to_action())?;

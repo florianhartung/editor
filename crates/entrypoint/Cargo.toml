@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 app = { workspace = true }
-core = { workspace = true }
+editor-core = { workspace = true }
 # frontend-gui = { workspace = true }
 frontend-tui = { workspace = true }
 

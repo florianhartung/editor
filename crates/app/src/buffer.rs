@@ -1,4 +1,4 @@
-use core::communication::Action;
+use editor_core::communication::Action;
 
 use ropey::Rope;
 

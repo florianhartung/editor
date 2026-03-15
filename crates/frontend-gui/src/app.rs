@@ -1,4 +1,4 @@
-use core::communication::{EditorEvent, Event, Key, KeyNamed};
+use editor_core::communication::{EditorEvent, Event, Key, KeyNamed};
 
 use iced::keyboard::key::Named;
 use iced_futures::keyboard;
@@ -6,11 +6,11 @@ use tokio::sync::mpsc::UnboundedSender;
 
 use iced::widget::text_editor;
 use iced::{
-    Element, Subscription, Task,
     widget::{
         column, text,
         text_editor::{Edit, KeyPress, Status},
     },
+    Element, Subscription, Task,
 };
 use log::debug;
 

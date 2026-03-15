@@ -1,4 +1,4 @@
-use core::{
+use editor_core::{
     EventSender,
     communication::{Action, Key, KeyNamed},
 };
@@ -20,7 +20,7 @@ type TerminalEvent = crossterm::event::Event;
 
 pub struct Frontend {}
 
-impl core::frontend::Frontend for Frontend {
+impl editor_core::frontend::Frontend for Frontend {
     async fn run(event_sender: EventSender, receive_action: UnboundedReceiver<Action>) {
         let mut terminal = ratatui::init();
         let mut app = App {

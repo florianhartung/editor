@@ -2,9 +2,9 @@
 //! It calls the core with a specific frontend.
 
 use anyhow::Result;
-use core::EventSender;
-use core::communication::{Action, EditorEvent, Event};
-use core::frontend::Frontend;
+use editor_core::EventSender;
+use editor_core::communication::{Action, EditorEvent, Event};
+use editor_core::frontend::Frontend;
 use ropey::Rope;
 use std::fs::File;
 use std::io::BufReader;

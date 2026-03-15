@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "crates/core",
+  "crates/editor-core",
   "crates/app",
   "crates/entrypoint",
   # "crates/frontend-gui",
@@ -10,7 +10,7 @@ resolver = "3"
 
 [workspace.dependencies]
 app = { path = "crates/app" }
-core = { path = "crates/core" }
+editor-core = { path = "crates/editor-core" }
 frontend-gui = { path = "crates/frontend-gui" }
 frontend-tui = { path = "crates/frontend-tui" }
 

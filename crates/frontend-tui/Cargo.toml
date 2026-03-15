@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-core = { workspace = true }
+core.workspace = true
 
-anyhow = { workspace = true }
-log = { workspace = true }
-ropey = { workspace = true }
+anyhow.workspace = true
+log.workspace = true
+ropey.workspace = true
 tokio = { workspace = true, features = ["rt"] }
+tokio-stream.workspace = true
 
-tokio-stream = "0.1"
-tokio-executor = "0.1"
+tokio-executor = "0.1.10"
 ratatui = "0.29.0"
 pollster = "0.4.0"
-crossterm = { version = "0.28", features = ["event-stream"] }
+crossterm = { version = "0.28.1", features = ["event-stream"] }
 # color-eyre = "0.6.5"

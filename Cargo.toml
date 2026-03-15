@@ -14,9 +14,8 @@ core = { path = "crates/core" }
 frontend-gui = { path = "crates/frontend-gui" }
 frontend-tui = { path = "crates/frontend-tui" }
 
-log = "0.4"
-thiserror = "2"
-ropey = "1"
-anyhow = "1"
-tokio = "1"
-tokio-stream = "0.1"
+log = "0.4.28"
+ropey = "1.6.1"
+anyhow = "1.0.100"
+tokio = "1.47.1"
+tokio-stream = "0.1.17"

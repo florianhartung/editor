@@ -2,12 +2,16 @@ use core::communication::Action;
 
 use ropey::Rope;
 
+/// A buffer is the in-memory representation of a document.
+///
+/// It is not possible to view the same buffer more than once at a time, for
+/// example in different tabs/windows.
 #[derive(Debug, Default)]
 pub struct Buffer {
     rope: Rope,
     /// The cursor position in chars. This points at where the next char will be inserted.
     ///
-    /// Note: The cursor position is uninterpretable when `rope` is of length 0.
+    /// Note: The cursor position is uninterpreted when `rope` is of length 0.
     cursor_position: usize,
 }
 

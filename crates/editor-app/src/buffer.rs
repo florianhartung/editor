@@ -23,7 +23,6 @@ impl Buffer {
         }
     }
 
-    /// Returns new cursor position
     pub fn insert_char(&mut self, c: char) {
         self.rope.insert_char(self.cursor_position, c);
         self.cursor_position += 1;

@@ -1,3 +1,9 @@
+//! Sets of motions define how inputs from the user manipulate the cursor and
+//! the buffer contents.
+//!
+//! Their interface is defined through the [`Motions`] trait, allowing different
+//! sets of motions to co-exist.
+
 use tokio::sync::mpsc::{UnboundedSender, error::SendError};
 
 use editor_core::communication::{Action, Key};

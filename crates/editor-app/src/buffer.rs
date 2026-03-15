@@ -1,6 +1,7 @@
 use ropey::Rope;
 
 use editor_core::communication::AppEvent;
+use unicode_segmentation::GraphemeCursor;
 
 /// A buffer is the in-memory representation of a document.
 ///
@@ -56,6 +57,9 @@ impl Buffer {
 
     /// Simple relative cursor movement
     pub fn cursor_forward(&mut self) {
+        let line_idx = self.current_cursor_position_line();
+        let line_chunks = self.rope.line(line_idx).chunks();
+
         self.cursor_position = self
             .cursor_position
             .saturating_add(1)

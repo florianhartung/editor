@@ -11,3 +11,5 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 log.workspace = true
 ropey.workspace = true
 tokio-stream.workspace = true
+
+unicode-segmentation = "1.12.0"

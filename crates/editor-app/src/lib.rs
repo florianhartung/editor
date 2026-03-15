@@ -13,7 +13,7 @@ use tokio_stream::{StreamExt, wrappers::UnboundedReceiverStream};
 
 use editor_core::{
     FrontendEventSender,
-    communication::{AppEvent, FocusTarget, FrontendEvent, Key},
+    communication::{AppEvent, FocusTarget, FrontendEvent, Key, KeyNamed},
     frontend::Frontend,
 };
 
@@ -23,6 +23,7 @@ use crate::{
 };
 
 mod buffer;
+mod graphemes;
 mod motions;
 
 #[tokio::main]

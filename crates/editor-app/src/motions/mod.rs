@@ -1,6 +1,6 @@
-use editor_core::communication::{Action, Key};
-
 use tokio::sync::mpsc::{UnboundedSender, error::SendError};
+
+use editor_core::communication::{Action, Key};
 
 use crate::Buffer;
 

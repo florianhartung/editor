@@ -1,6 +1,6 @@
-use editor_core::communication::{Action, Key, KeyNamed};
-
 use tokio::sync::mpsc::{UnboundedSender, error::SendError};
+
+use editor_core::communication::{Action, Key, KeyNamed};
 
 use crate::{buffer::Buffer, motions::Motions};
 

@@ -1,13 +1,12 @@
-use editor_core::communication::{Action, Event};
-
+use iced::{
+    Element, Subscription, Task,
+    widget::text_editor::{self, Edit},
+};
 use iced_futures::MaybeSend;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-use iced::{
-    widget::text_editor::{self, Edit},
-    Element, Subscription, Task,
-};
+use editor_core::communication::{Action, Event};
 
 mod app;
 

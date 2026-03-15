@@ -1,23 +1,26 @@
 //! The entry point for the text editor application.
 //! It calls the core with a specific frontend.
 
-use anyhow::Result;
-use editor_core::EventSender;
-use editor_core::communication::{Action, EditorEvent, Event};
-use editor_core::frontend::Frontend;
-use ropey::Rope;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::PathBuf;
-use std::time::Duration;
-use tokio::sync::mpsc::error::SendError;
-use tokio::sync::mpsc::{self, UnboundedSender};
-use tokio::time::sleep;
-use tokio_stream::StreamExt;
-use tokio_stream::wrappers::UnboundedReceiverStream;
+use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
 
-use crate::buffer::Buffer;
-use crate::motions::{HelixMotions, Motions, NonModalMotions};
+use anyhow::Result;
+use ropey::Rope;
+use tokio::{
+    sync::mpsc::{self, UnboundedSender, error::SendError},
+    time::sleep,
+};
+use tokio_stream::{StreamExt, wrappers::UnboundedReceiverStream};
+
+use editor_core::{
+    EventSender,
+    communication::{Action, EditorEvent, Event},
+    frontend::Frontend,
+};
+
+use crate::{
+    buffer::Buffer,
+    motions::{HelixMotions, Motions, NonModalMotions},
+};
 
 mod buffer;
 mod motions;

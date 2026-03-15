@@ -1,7 +1,3 @@
-use editor_core::{
-    EventSender,
-    communication::{Action, Key, KeyNamed},
-};
 use std::io;
 
 use crossterm::event::{EventStream, KeyModifiers};
@@ -15,6 +11,11 @@ use ratatui::{
 use ropey::Rope;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_stream::{StreamExt, wrappers::UnboundedReceiverStream};
+
+use editor_core::{
+    EventSender,
+    communication::{Action, Key, KeyNamed},
+};
 
 type TerminalEvent = crossterm::event::Event;
 

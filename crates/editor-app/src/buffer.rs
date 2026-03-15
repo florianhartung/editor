@@ -1,6 +1,6 @@
-use editor_core::communication::Action;
-
 use ropey::Rope;
+
+use editor_core::communication::Action;
 
 /// A buffer is the in-memory representation of a document.
 ///

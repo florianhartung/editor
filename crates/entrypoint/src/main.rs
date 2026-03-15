@@ -1,7 +1,8 @@
-use editor_core::EventSender;
 use std::fs::File;
 
 use clap::Parser;
+
+use editor_core::EventSender;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]

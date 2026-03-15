@@ -1,17 +1,16 @@
-use editor_core::communication::{EditorEvent, Event, Key, KeyNamed};
-
-use iced::keyboard::key::Named;
+use iced::{
+    Element, Subscription, Task,
+    keyboard::key::Named,
+    widget::{
+        column, text,
+        text_editor::{self, Edit, KeyPress, Status},
+    },
+};
 use iced_futures::keyboard;
 use tokio::sync::mpsc::UnboundedSender;
 
-use iced::widget::text_editor;
-use iced::{
-    widget::{
-        column, text,
-        text_editor::{Edit, KeyPress, Status},
-    },
-    Element, Subscription, Task,
-};
+use editor_core::communication::{EditorEvent, Event, Key, KeyNamed};
+
 use log::debug;
 
 #[derive(Default)]

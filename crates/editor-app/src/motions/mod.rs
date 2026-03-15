@@ -6,11 +6,13 @@
 
 use tokio::sync::mpsc::{UnboundedSender, error::SendError};
 
-use editor_core::communication::{Action, Key};
+use editor_core::communication::{AppEvent, Key};
 
 use crate::Buffer;
 
+#[expect(unused, reason = "no support for switching between motions yet")]
 mod non_modal;
+#[expect(unused, reason = "no support for switching between motions yet")]
 pub use non_modal::NonModalMotions;
 
 mod helix;
@@ -22,6 +24,6 @@ pub trait Motions: std::fmt::Debug + Send + Sync {
         &mut self,
         editor: &mut Buffer,
         key: Key,
-        send_action: &UnboundedSender<Action>,
-    ) -> Result<(), SendError<Action>>;
+        send_app_event: &UnboundedSender<AppEvent>,
+    ) -> Result<(), SendError<AppEvent>>;
 }

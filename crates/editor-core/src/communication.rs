@@ -2,15 +2,27 @@
 
 use ropey::Rope;
 
-/// Events are emitted by frontends and get sent to the core application
-/// They describe state changes, that are not frontend-specific.
+/// An event emitted by the frontend.
+///
+/// This is send to the main application.
 #[derive(Debug, Clone)]
-pub enum Event {
-    // only one editor for now, thus no id required
-    Editor(/* editor_id, */ EditorEvent),
+pub enum FrontendEvent {
+    /// A key was pressed by the user.
+    KeyPress(Key),
+
+    /// A new element was focused.
+    Focus(FocusTarget),
+
     // TODO use custom CoreOsString type that is converted into a [u8] when send
     // to the frontend and validated when it is received in the core
+    /// A file was requested to be opened.
     OpenFile { path: String },
+}
+
+#[derive(Debug, Clone)]
+pub enum FocusTarget {
+    // only one editor for now, thus no id required
+    Editor, /* { id: usize } */
 }
 
 #[derive(Debug, Clone)]
@@ -36,15 +48,15 @@ pub enum KeyNamed {
     Right,
 }
 
-/// Actions are emitted by the core to the editor state and the frontend.
-/// Actions may or may not result from handling of an event
+/// App events are emitted by the main applicatin and send to the frontend. They
+/// may or may not result from handling of an event.
 #[derive(Debug, Clone)]
-pub enum Action {
+pub enum AppEvent {
     HintBufferLoading,
     SetBuffer { contents: Rope, title: String },
     SetBufferContents(Rope),
     SetCursorPosition { line: usize, column: usize },
-    Batched(Vec<Action>),
+    Batched(Vec<AppEvent>),
     // TODO allow core to request program termination?
     // RequestExit,
 }

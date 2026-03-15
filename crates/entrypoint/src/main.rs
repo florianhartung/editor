@@ -2,7 +2,7 @@ use std::fs::File;
 
 use clap::Parser;
 
-use editor_core::EventSender;
+use editor_core::FrontendEventSender;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -15,7 +15,7 @@ fn main() -> anyhow::Result<()> {
 
     let args = Args::parse();
 
-    let post_init = |event_sender: &EventSender| {
+    let post_init = |event_sender: &FrontendEventSender| {
         if let Some(file_to_open) = args.file {
             event_sender.open_file(file_to_open);
         } else {

@@ -12,50 +12,53 @@ use tokio::{
 use tokio_stream::{StreamExt, wrappers::UnboundedReceiverStream};
 
 use editor_core::{
-    EventSender,
-    communication::{Action, EditorEvent, Event},
+    FrontendEventSender,
+    communication::{AppEvent, FocusTarget, FrontendEvent, Key},
     frontend::Frontend,
 };
 
 use crate::{
     buffer::Buffer,
-    motions::{HelixMotions, Motions, NonModalMotions},
+    motions::{HelixMotions, Motions},
 };
 
 mod buffer;
 mod motions;
 
 #[tokio::main]
-pub async fn run<F: Frontend>(post_init: impl FnOnce(&EventSender)) -> Result<()> {
-    let mut editor = Editor::new();
-
+pub async fn run<F: Frontend>(post_init: impl FnOnce(&FrontendEventSender)) -> Result<()> {
     // These are the two main communication channels
-    let (send_event, receive_event) = mpsc::unbounded_channel::<Event>();
-    let (send_action, receive_action) = mpsc::unbounded_channel::<Action>();
+    let (frontend_event_sender, frontend_event_receiver) =
+        mpsc::unbounded_channel::<FrontendEvent>();
+    let (app_event_sender, app_event_receiver) = mpsc::unbounded_channel::<AppEvent>();
 
-    let event_sender = EventSender::new(send_event);
+    let frontend_event_sender = FrontendEventSender::new(frontend_event_sender);
 
-    post_init(&event_sender);
+    let mut editor = Editor::new(app_event_sender);
+
+    post_init(&frontend_event_sender);
 
     // Spawn the backend main loop in a separate task
     tokio::task::spawn(async move {
-        let mut receive_event = UnboundedReceiverStream::new(receive_event);
+        let mut receive_event = UnboundedReceiverStream::new(frontend_event_receiver);
         while let Some(event) = receive_event.next().await {
             log::debug!("handling event {event:?}");
-            let event_handling_result = editor.handle_event(event, &send_action).await;
+            let event_handling_result = editor.handle_event(event).await;
             if event_handling_result.is_err() {
                 break;
             }
         }
     });
 
-    F::run(event_sender, receive_action).await;
+    F::run(frontend_event_sender, app_event_receiver).await;
 
     Ok(())
 }
 
 #[derive(Debug)]
 pub struct Editor {
+    pub event_sender: UnboundedSender<AppEvent>,
+
     pub motions: Box<dyn Motions>,
     pub buffer: Buffer,
     // An index for the currently opened buffer into [`Self::buffers`].
@@ -64,12 +67,13 @@ pub struct Editor {
 }
 
 impl Editor {
-    fn new() -> Self {
+    fn new(event_sender: UnboundedSender<AppEvent>) -> Self {
         let buffer = Buffer::default();
         // let motions = Box::new(NonModalMotions::new(&buffer));
         let motions = Box::new(HelixMotions::new(&buffer));
 
         Self {
+            event_sender,
             motions,
             buffer,
             // buffers: vec![Buffer::default()],
@@ -77,45 +81,36 @@ impl Editor {
         }
     }
 
-    async fn handle_event(
-        &mut self,
-        event: Event,
-        send_action: &UnboundedSender<Action>,
-    ) -> Result<(), SendError<Action>> {
+    async fn handle_event(&mut self, event: FrontendEvent) -> Result<(), SendError<AppEvent>> {
         match event {
-            Event::Editor(editor_event) => self.handle_editor_event(editor_event, send_action)?,
-            Event::OpenFile { path } => {
+            FrontendEvent::KeyPress(key) => self.handle_key_press(key)?,
+            FrontendEvent::Focus(FocusTarget::Editor) => {
+                // TODO implement focus system
+            }
+            FrontendEvent::OpenFile { path } => {
                 let path = PathBuf::from(path);
                 let file = File::open(&path).unwrap();
-                send_action.send(Action::HintBufferLoading)?;
+                self.event_sender.send(AppEvent::HintBufferLoading)?;
 
                 self.buffer = Buffer::new(Rope::from_reader(BufReader::new(file)).unwrap());
                 sleep(Duration::from_secs(1)).await;
 
-                send_action.send(self.buffer.full_info_to_action())?;
+                self.event_sender
+                    .send(self.buffer.full_info_to_app_event())?;
             }
         }
 
         Ok(())
     }
 
-    fn handle_editor_event(
-        &mut self,
-        editor_event: EditorEvent,
-        send_action: &UnboundedSender<Action>,
-    ) -> Result<(), SendError<Action>> {
-        match editor_event {
-            EditorEvent::KeyPress(key) => {
-                self.motions
-                    .handle_key_press(&mut self.buffer, key, send_action)?;
-                // editor.perform(&action);
-            }
-        }
+    fn handle_key_press(&mut self, key: Key) -> Result<(), SendError<AppEvent>> {
+        self.motions
+            .handle_key_press(&mut self.buffer, key, &self.event_sender)?;
 
         Ok(())
     }
 
-    //     fn perform(&mut self, _action: &Action) {
+    //     fn perform(&mut self, _app_event: &AppEvent) {
     //         todo!();
     //     }
 }

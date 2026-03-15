@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 editor-core.workspace = true
+editor-app.workspace = true
 
 anyhow.workspace = true
 log.workspace = true
@@ -16,4 +17,5 @@ tokio-executor = "0.1.10"
 ratatui = "0.29.0"
 pollster = "0.4.0"
 crossterm = { version = "0.28.1", features = ["event-stream"] }
-# color-eyre = "0.6.5"
+env_logger = "0.11"
+clap = { version = "4.5.54", features = ["derive"] }

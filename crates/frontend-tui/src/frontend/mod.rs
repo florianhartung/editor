@@ -13,8 +13,8 @@ use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_stream::{StreamExt, wrappers::UnboundedReceiverStream};
 
 use editor_core::{
-    EventSender,
-    communication::{Action, Key, KeyNamed},
+    FrontendEventSender,
+    communication::{AppEvent, Key, KeyNamed},
 };
 
 type TerminalEvent = crossterm::event::Event;
@@ -22,17 +22,23 @@ type TerminalEvent = crossterm::event::Event;
 pub struct Frontend {}
 
 impl editor_core::frontend::Frontend for Frontend {
-    async fn run(event_sender: EventSender, receive_action: UnboundedReceiver<Action>) {
+    async fn run(
+        frontend_event_sender: FrontendEventSender,
+        app_event_receiver: UnboundedReceiver<AppEvent>,
+    ) {
         let mut terminal = ratatui::init();
         let mut app = App {
             exit: false,
-            receive_action: UnboundedReceiverStream::new(receive_action),
-            event_sender,
+            app_event_receiver: UnboundedReceiverStream::new(app_event_receiver),
+            event_sender: frontend_event_sender,
             terminal_event_stream: EventStream::new(),
 
             buffer: None,
             cursor_block_for_current_frame: None,
         };
+
+        // Currently, no focus system is implemented.
+        app.event_sender.focus_editor();
 
         let app_result = app.run(&mut terminal).await;
         ratatui::restore();
@@ -42,8 +48,8 @@ impl editor_core::frontend::Frontend for Frontend {
 
 struct App {
     exit: bool,
-    receive_action: UnboundedReceiverStream<Action>,
-    event_sender: EventSender,
+    app_event_receiver: UnboundedReceiverStream<AppEvent>,
+    event_sender: FrontendEventSender,
     terminal_event_stream: crossterm::event::EventStream,
 
     /// None if loading
@@ -90,8 +96,8 @@ impl App {
         // TODO merge streams, because this is basically a `loop { select! { ...} }`
         tokio::select! {
             biased; // fairness does not matter, so we might as well do this for reproducibility
-            Some(event) = self.terminal_event_stream.next() => self.handle_terminal_event(event?).await,
-            Some(action) = self.receive_action.next() => self.handle_action(action),
+            Some(terminal_event) = self.terminal_event_stream.next() => self.handle_terminal_event(terminal_event?).await,
+            Some(app_event) = self.app_event_receiver.next() => self.handle_app_event(app_event),
         }
 
         Ok(())
@@ -126,27 +132,27 @@ impl App {
         }
     }
 
-    fn handle_action(&mut self, action: Action) {
-        match action {
-            Action::SetBufferContents(contents) => {
+    fn handle_app_event(&mut self, app_event: AppEvent) {
+        match app_event {
+            AppEvent::SetBufferContents(contents) => {
                 self.buffer.get_or_insert_default().contents = rope_to_lines(contents);
             }
-            Action::SetBuffer { contents, title } => {
+            AppEvent::SetBuffer { contents, title } => {
                 self.buffer = Some(Buffer {
                     contents: rope_to_lines(contents),
                     filename: Some(title),
                     cursor: (0, 0),
                 });
             }
-            Action::HintBufferLoading => self.buffer = None,
-            Action::SetCursorPosition { line, column } => {
+            AppEvent::HintBufferLoading => self.buffer = None,
+            AppEvent::SetCursorPosition { line, column } => {
                 if let Some(buffer) = &mut self.buffer {
                     buffer.cursor = (u16::try_from(column).unwrap(), u16::try_from(line).unwrap());
                 }
             }
-            Action::Batched(actions) => {
-                for action in actions {
-                    self.handle_action(action);
+            AppEvent::Batched(app_events) => {
+                for app_event in app_events {
+                    self.handle_app_event(app_event);
                 }
             }
         }

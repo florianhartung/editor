@@ -1,6 +1,6 @@
 use ropey::Rope;
 
-use editor_core::communication::Action;
+use editor_core::communication::AppEvent;
 
 /// A buffer is the in-memory representation of a document.
 ///
@@ -101,10 +101,10 @@ impl Buffer {
         self.insert_char('\n');
     }
 
-    pub fn full_info_to_action(&self) -> Action {
-        Action::Batched(vec![
-            Action::SetBufferContents(self.rope.clone()),
-            Action::SetCursorPosition {
+    pub fn full_info_to_app_event(&self) -> AppEvent {
+        AppEvent::Batched(vec![
+            AppEvent::SetBufferContents(self.rope.clone()),
+            AppEvent::SetCursorPosition {
                 line: self.current_cursor_position_line(),
                 column: self.current_cursor_position_column(),
             },

@@ -1,6 +1,6 @@
 use tokio::sync::mpsc::{UnboundedSender, error::SendError};
 
-use editor_core::communication::{Action, Key, KeyNamed};
+use editor_core::communication::{AppEvent, Key, KeyNamed};
 
 use crate::{buffer::Buffer, motions::Motions};
 
@@ -22,31 +22,31 @@ impl Motions for NonModalMotions {
         &mut self,
         buffer: &mut Buffer,
         key: Key,
-        send_action: &UnboundedSender<Action>,
-    ) -> Result<(), SendError<Action>> {
+        event_sender: &UnboundedSender<AppEvent>,
+    ) -> Result<(), SendError<AppEvent>> {
         match key {
             editor_core::communication::Key::Named(KeyNamed::Escape) => {
                 todo!()
             }
             editor_core::communication::Key::Named(KeyNamed::Backspace) => {
                 buffer.remove_char();
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Enter) => {
                 buffer.insert_new_line();
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Tab) => {
                 let num_spaces_to_insert = 4 - buffer.current_cursor_position_column() % 4;
 
                 const SPACES: &str = "    ";
                 buffer.insert(&SPACES[0..num_spaces_to_insert]);
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Char(c) => {
                 buffer.insert_char(c);
 
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Up) => {
                 let line = buffer.current_cursor_position_line();
@@ -55,23 +55,23 @@ impl Motions for NonModalMotions {
                     line.saturating_sub(1),
                     self.cursor_optimal_column,
                 );
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Down) => {
                 let line = buffer.current_cursor_position_line();
 
                 buffer.set_cursor_position_saturating(line + 1, self.cursor_optimal_column);
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Left) => {
                 buffer.cursor_backward();
                 self.cursor_optimal_column = buffer.current_cursor_position_column();
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Right) => {
                 buffer.cursor_forward();
                 self.cursor_optimal_column = buffer.current_cursor_position_column();
-                send_action.send(buffer.full_info_to_action())?;
+                event_sender.send(buffer.full_info_to_app_event())?;
             }
         }
 

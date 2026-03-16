@@ -1,7 +1,8 @@
 use ropey::Rope;
 
 use editor_core::communication::AppEvent;
-use unicode_segmentation::GraphemeCursor;
+
+use crate::graphemes;
 
 /// A buffer is the in-memory representation of a document.
 ///
@@ -10,35 +11,36 @@ use unicode_segmentation::GraphemeCursor;
 #[derive(Debug, Default)]
 pub struct Buffer {
     rope: Rope,
-    /// The cursor position in chars. This points at where the next char will be inserted.
+    /// The cursor index in chars.
     ///
-    /// Note: The cursor position is uninterpreted when `rope` is of length 0.
-    cursor_position: usize,
+    /// It must always be in range `0..=C` with `C` being the current rope
+    /// length in chars.
+    cursor_char_idx: usize,
 }
 
 impl Buffer {
     pub fn new(initial_contents: Rope) -> Self {
         Self {
             rope: initial_contents,
-            cursor_position: 0,
+            cursor_char_idx: 0,
         }
     }
 
     pub fn insert_char(&mut self, c: char) {
-        self.rope.insert_char(self.cursor_position, c);
-        self.cursor_position += 1;
+        self.rope.insert_char(self.cursor_char_idx, c);
+        self.cursor_char_idx += 1;
     }
 
     pub fn insert(&mut self, s: &str) {
-        self.rope.insert(self.cursor_position, s);
-        self.cursor_position += s.len();
+        self.rope.insert(self.cursor_char_idx, s);
+        self.cursor_char_idx += s.len();
     }
 
     pub fn remove_char(&mut self) {
-        if self.rope.len_chars() > 0 && self.cursor_position > 0 {
+        if self.rope.len_chars() > 0 && self.cursor_char_idx > 0 {
             self.rope
-                .remove((self.cursor_position - 1)..(self.cursor_position));
-            self.cursor_position -= 1;
+                .remove((self.cursor_char_idx - 1)..(self.cursor_char_idx));
+            self.cursor_char_idx -= 1;
         }
     }
 
@@ -52,7 +54,7 @@ impl Buffer {
         // Saturate column index
         let column_index = column_index.min(line.len_chars().saturating_sub(1));
 
-        self.cursor_position = start_of_line + column_index;
+        self.cursor_char_idx = start_of_line + column_index;
     }
 
     /// Simple relative cursor movement
@@ -60,28 +62,29 @@ impl Buffer {
         let line_idx = self.current_cursor_position_line();
         let line_chunks = self.rope.line(line_idx).chunks();
 
-        self.cursor_position = self
-            .cursor_position
+        self.cursor_char_idx = self
+            .cursor_char_idx
             .saturating_add(1)
             .min(self.rope.len_chars());
     }
 
     /// Simple relative cursor movement
     pub fn cursor_backward(&mut self) {
-        self.cursor_position = self.cursor_position.saturating_sub(1);
+        self.cursor_char_idx =
+            graphemes::prev_grapheme_char_index(self.rope.slice(..), self.cursor_char_idx);
     }
 
     pub fn current_cursor_position_column(&self) -> usize {
         let start_of_line = self.rope.line_to_char(self.current_cursor_position_line());
-        self.cursor_position - start_of_line
+        self.cursor_char_idx - start_of_line
     }
 
     pub fn current_cursor_position_line(&self) -> usize {
-        self.rope.char_to_line(self.cursor_position)
+        self.rope.char_to_line(self.cursor_char_idx)
     }
 
     pub fn cursor_seek_next_word_start(&mut self, include_punctuation_in_words: bool) {
-        let chars_from_cursor = self.rope.chars_at(self.cursor_position);
+        let chars_from_cursor = self.rope.chars_at(self.cursor_char_idx);
         let num_chars_to_skip = chars_from_cursor
             .skip(1)
             .scan(false, |found_whitespace, next| {
@@ -96,8 +99,8 @@ impl Buffer {
             })
             .count();
 
-        let new_cursor_position = self.cursor_position + num_chars_to_skip;
-        self.cursor_position = new_cursor_position.min(self.rope.len_chars());
+        let new_cursor_position = self.cursor_char_idx + num_chars_to_skip;
+        self.cursor_char_idx = new_cursor_position.min(self.rope.len_chars());
     }
 
     pub fn insert_new_line(&mut self) {
@@ -107,11 +110,70 @@ impl Buffer {
 
     pub fn full_info_to_app_event(&self) -> AppEvent {
         AppEvent::Batched(vec![
-            AppEvent::SetBufferContents(self.rope.clone()),
-            AppEvent::SetCursorPosition {
+            AppEvent::SetBufferViewContents(self.rope.clone()),
+            AppEvent::SetBufferViewCursorPosition {
                 line: self.current_cursor_position_line(),
                 column: self.current_cursor_position_column(),
             },
         ])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use ropey::Rope;
+
+    use crate::buffer::Buffer;
+
+    #[test]
+    fn basic_manipulation() {
+        let mut buf = Buffer::new(Rope::from_str("Hello world!\nExample text"));
+
+        buf.set_cursor_position_saturating(1, 2);
+        buf.remove_char();
+        assert_eq!(buf.rope, "Hello world!\nEample text");
+
+        buf.cursor_backward();
+        buf.cursor_backward();
+
+        buf.remove_char();
+        assert_eq!(buf.rope, "Hello world\nEample text");
+    }
+
+    #[test]
+    fn cursor_grapheme_cluster_granularity() {
+        const SINGLE_GRAPHEME_CLUSTER: &str = "\u{1100}\u{1161}\u{11A8}"; // 3 code points (ᄀ ᅡ ᆨ) = 1 grapheme cluster (각)
+        let mut buf = Buffer::new(Rope::from_str(SINGLE_GRAPHEME_CLUSTER));
+
+        // Going forward and backward should always move entire graphemes
+        buf.cursor_char_idx = 0;
+        buf.cursor_forward();
+        assert_eq!(buf.cursor_char_idx, 3);
+        buf.cursor_backward();
+        assert_eq!(buf.cursor_char_idx, 0);
+
+        // If the cursor is in the middle of a grapheme, backwards movements
+        // moves to the start of the current grapheme. Forwards movements moves
+        // to the next grapheme.
+        buf.cursor_char_idx = 2;
+        buf.cursor_backward();
+        assert_eq!(buf.cursor_char_idx, 0);
+        buf.cursor_char_idx = 2;
+        buf.cursor_forward();
+        assert_eq!(buf.cursor_char_idx, 3);
+    }
+
+    #[test]
+    fn cursor_saturating_movements() {
+        const S: &str = "ABC";
+        let mut buf = Buffer::new(Rope::from_str(S));
+
+        buf.cursor_char_idx = 0;
+        buf.cursor_backward();
+        assert_eq!(buf.cursor_char_idx, 0);
+
+        buf.cursor_char_idx = 3;
+        buf.cursor_forward();
+        assert_eq!(buf.cursor_char_idx, 3);
     }
 }

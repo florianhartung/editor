@@ -134,18 +134,18 @@ impl App {
 
     fn handle_app_event(&mut self, app_event: AppEvent) {
         match app_event {
-            AppEvent::SetBufferContents(contents) => {
+            AppEvent::SetBufferViewContents(contents) => {
                 self.buffer.get_or_insert_default().contents = rope_to_lines(contents);
             }
-            AppEvent::SetBuffer { contents, title } => {
+            AppEvent::SetBufferView { contents, title } => {
                 self.buffer = Some(Buffer {
                     contents: rope_to_lines(contents),
                     filename: Some(title),
                     cursor: (0, 0),
                 });
             }
-            AppEvent::HintBufferLoading => self.buffer = None,
-            AppEvent::SetCursorPosition { line, column } => {
+            AppEvent::HintBufferViewLoading => self.buffer = None,
+            AppEvent::SetBufferViewCursorPosition { line, column } => {
                 if let Some(buffer) = &mut self.buffer {
                     buffer.cursor = (u16::try_from(column).unwrap(), u16::try_from(line).unwrap());
                 }

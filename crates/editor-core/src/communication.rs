@@ -52,10 +52,10 @@ pub enum KeyNamed {
 /// may or may not result from handling of an event.
 #[derive(Debug, Clone)]
 pub enum AppEvent {
-    HintBufferLoading,
-    SetBuffer { contents: Rope, title: String },
-    SetBufferContents(Rope),
-    SetCursorPosition { line: usize, column: usize },
+    HintBufferViewLoading,
+    SetBufferView { contents: Rope, title: String },
+    SetBufferViewContents(Rope),
+    SetBufferViewCursorPosition { line: usize, column: usize },
     Batched(Vec<AppEvent>),
     // TODO allow core to request program termination?
     // RequestExit,

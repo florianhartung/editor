@@ -91,7 +91,7 @@ impl Editor {
             FrontendEvent::OpenFile { path } => {
                 let path = PathBuf::from(path);
                 let file = File::open(&path).unwrap();
-                self.event_sender.send(AppEvent::HintBufferLoading)?;
+                self.event_sender.send(AppEvent::HintBufferViewLoading)?;
 
                 self.buffer = Buffer::new(Rope::from_reader(BufReader::new(file)).unwrap());
                 sleep(Duration::from_secs(1)).await;

@@ -4,7 +4,8 @@ use editor_core::communication::AppEvent;
 
 use crate::graphemes;
 
-/// A buffer is the in-memory representation of a document.
+/// A buffer is the in-memory representation of a document providing operations
+/// on a per-grapheme or per-char granularity.
 ///
 /// It is not possible to view the same buffer more than once at a time, for
 /// example in different tabs/windows.
@@ -16,6 +17,9 @@ pub struct Buffer {
     /// It must always be in range `0..=C` with `C` being the current rope
     /// length in chars.
     cursor_char_idx: usize,
+
+    /// In graphmes
+    cursor_preferred_column_idx: usize,
 }
 
 impl Buffer {
@@ -23,6 +27,7 @@ impl Buffer {
         Self {
             rope: initial_contents,
             cursor_char_idx: 0,
+            cursor_preferred_column_idx: 0,
         }
     }
 
@@ -59,24 +64,25 @@ impl Buffer {
 
     /// Simple relative cursor movement
     pub fn cursor_forward(&mut self) {
-        let line_idx = self.current_cursor_position_line();
-        let line_chunks = self.rope.line(line_idx).chunks();
-
-        self.cursor_char_idx = self
-            .cursor_char_idx
-            .saturating_add(1)
-            .min(self.rope.len_chars());
+        self.cursor_char_idx =
+            graphemes::next_grapheme_boundary(self.rope.slice(..), self.cursor_char_idx);
+        // TODO might be a bit wasteful, maybe store column in a field
+        self.cursor_preferred_column_idx = self.current_cursor_position_column();
     }
 
     /// Simple relative cursor movement
     pub fn cursor_backward(&mut self) {
         self.cursor_char_idx =
-            graphemes::prev_grapheme_char_index(self.rope.slice(..), self.cursor_char_idx);
+            graphemes::prev_grapheme_boundary(self.rope.slice(..), self.cursor_char_idx);
+        // TODO might be a bit wasteful, maybe store column in a field
+        self.cursor_preferred_column_idx = self.current_cursor_position_column();
     }
 
     pub fn current_cursor_position_column(&self) -> usize {
-        let start_of_line = self.rope.line_to_char(self.current_cursor_position_line());
-        self.cursor_char_idx - start_of_line
+        let line_idx = self.rope.char_to_line(self.cursor_char_idx);
+        let line_start_char_idx = self.rope.line_to_char(line_idx);
+        let line_until_cursor = self.rope.slice(line_start_char_idx..self.cursor_char_idx);
+        graphemes::len_graphemes(line_until_cursor)
     }
 
     pub fn current_cursor_position_line(&self) -> usize {
@@ -116,6 +122,42 @@ impl Buffer {
                 column: self.current_cursor_position_column(),
             },
         ])
+    }
+
+    pub fn cursor_up(&mut self) {
+        let line_idx = self.rope.char_to_line(self.cursor_char_idx);
+        if line_idx == 0 {
+            // TODO maybe add flag for this saturating behavior?
+            self.cursor_char_idx = 0;
+            return;
+        }
+        let prev_line_idx = line_idx - 1;
+        let prev_line_char_idx = self.rope.line_to_char(prev_line_idx);
+        self.move_to_preferred_column_in_line(prev_line_char_idx);
+    }
+
+    pub fn cursor_down(&mut self) {
+        let line_idx = self.rope.char_to_line(self.cursor_char_idx);
+        if line_idx == self.rope.len_lines() {
+            self.cursor_char_idx = self.rope.len_chars();
+            return;
+        }
+        let next_line_idx = line_idx + 1;
+        let next_line_char_idx = self.rope.line_to_char(next_line_idx);
+        self.move_to_preferred_column_in_line(next_line_char_idx);
+    }
+
+    fn move_to_preferred_column_in_line(&mut self, line_char_idx: usize) {
+        let cursor_char_idx = graphemes::nth_next_grapheme_boundary(
+            self.rope.slice(..),
+            line_char_idx,
+            self.cursor_preferred_column_idx,
+        );
+
+        let line_idx = self.rope.char_to_line(line_char_idx);
+        let line_len_chars = self.rope.line(line_idx).len_chars();
+
+        self.cursor_char_idx = cursor_char_idx.min(line_char_idx + line_len_chars - 1);
     }
 }
 

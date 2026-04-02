@@ -1,4 +1,4 @@
-use std::io;
+use std::{borrow::Cow, io};
 
 use crossterm::event::{EventStream, KeyModifiers};
 use ratatui::{
@@ -35,6 +35,7 @@ impl editor_core::frontend::Frontend for Frontend {
 
             buffer: None,
             cursor_block_for_current_frame: None,
+            status_message: None,
         };
 
         // Currently, no focus system is implemented.
@@ -54,6 +55,7 @@ struct App {
 
     /// None if loading
     buffer: Option<Buffer>,
+    status_message: Option<Cow<'static, str>>,
 
     cursor_block_for_current_frame: Option<Rect>,
 }
@@ -155,6 +157,9 @@ impl App {
                     self.handle_app_event(app_event);
                 }
             }
+            AppEvent::SetStatusMessage(new_status) => {
+                self.status_message = new_status;
+            }
         }
     }
 }
@@ -188,7 +193,13 @@ impl Widget for &mut App {
 
         text.render(block_inner, buf);
         self.cursor_block_for_current_frame = Some(block_inner);
+
         my_block.render(area, buf);
+
+        if let Some(status_message) = self.status_message.as_deref() {
+            let text = Text::from(status_message);
+            text.render(area, buf);
+        }
 
         // Paragraph::new("hello world")
         //     .centered()

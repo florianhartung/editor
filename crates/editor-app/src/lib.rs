@@ -3,7 +3,7 @@
 
 use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use ropey::Rope;
 use tokio::{
     sync::mpsc::{self, UnboundedSender, error::SendError},
@@ -13,7 +13,7 @@ use tokio_stream::{StreamExt, wrappers::UnboundedReceiverStream};
 
 use editor_core::{
     FrontendEventSender,
-    communication::{AppEvent, FocusTarget, FrontendEvent, Key, KeyNamed},
+    communication::{AppEvent, FocusTarget, FrontendEvent, Key},
     frontend::Frontend,
 };
 
@@ -35,7 +35,7 @@ pub async fn run<F: Frontend>(post_init: impl FnOnce(&FrontendEventSender)) -> R
 
     let frontend_event_sender = FrontendEventSender::new(frontend_event_sender);
 
-    let mut editor = Editor::new(app_event_sender);
+    let mut editor = Editor::new(app_event_sender).context("failed to initialize editor state")?;
 
     post_init(&frontend_event_sender);
 
@@ -68,18 +68,18 @@ pub struct Editor {
 }
 
 impl Editor {
-    fn new(event_sender: UnboundedSender<AppEvent>) -> Self {
+    fn new(event_sender: UnboundedSender<AppEvent>) -> Result<Self, SendError<AppEvent>> {
         let buffer = Buffer::default();
         // let motions = Box::new(NonModalMotions::new(&buffer));
-        let motions = Box::new(HelixMotions::new(&buffer));
+        let motions = Box::new(HelixMotions::new(&event_sender)?);
 
-        Self {
+        Ok(Self {
             event_sender,
             motions,
             buffer,
             // buffers: vec![Buffer::default()],
             // current_buffer: 0,
-        }
+        })
     }
 
     async fn handle_event(&mut self, event: FrontendEvent) -> Result<(), SendError<AppEvent>> {

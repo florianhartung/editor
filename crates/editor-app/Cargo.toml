@@ -13,3 +13,4 @@ ropey.workspace = true
 tokio-stream.workspace = true
 
 unicode-segmentation = "1.12.0"
+unicode-width = "0.2.0"

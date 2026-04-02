@@ -5,15 +5,11 @@ use editor_core::communication::{AppEvent, Key, KeyNamed};
 use crate::{buffer::Buffer, motions::Motions};
 
 #[derive(Debug)]
-pub struct NonModalMotions {
-    cursor_optimal_column: usize,
-}
+pub struct NonModalMotions;
 
 impl NonModalMotions {
     pub fn new(buffer: &Buffer) -> Self {
-        Self {
-            cursor_optimal_column: buffer.current_cursor_position_column(),
-        }
+        Self
     }
 }
 
@@ -45,32 +41,22 @@ impl Motions for NonModalMotions {
             }
             editor_core::communication::Key::Char(c) => {
                 buffer.insert_char(c);
-
                 event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Up) => {
-                let line = buffer.current_cursor_position_line();
-
-                buffer.set_cursor_position_saturating(
-                    line.saturating_sub(1),
-                    self.cursor_optimal_column,
-                );
+                buffer.cursor_up();
                 event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Down) => {
-                let line = buffer.current_cursor_position_line();
-
-                buffer.set_cursor_position_saturating(line + 1, self.cursor_optimal_column);
+                buffer.cursor_down();
                 event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Left) => {
                 buffer.cursor_backward();
-                self.cursor_optimal_column = buffer.current_cursor_position_column();
                 event_sender.send(buffer.full_info_to_app_event())?;
             }
             editor_core::communication::Key::Named(KeyNamed::Right) => {
                 buffer.cursor_forward();
-                self.cursor_optimal_column = buffer.current_cursor_position_column();
                 event_sender.send(buffer.full_info_to_app_event())?;
             }
         }

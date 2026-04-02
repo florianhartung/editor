@@ -6,7 +6,6 @@ use crate::{buffer::Buffer, motions::Motions};
 
 #[derive(Debug)]
 pub struct HelixMotions {
-    cursor_optimal_column: usize,
     current_mode: Mode,
 }
 
@@ -17,11 +16,12 @@ enum Mode {
 }
 
 impl HelixMotions {
-    pub fn new(buffer: &Buffer) -> Self {
-        Self {
-            cursor_optimal_column: buffer.current_cursor_position_column(),
+    pub fn new(event_sender: &UnboundedSender<AppEvent>) -> Result<Self, SendError<AppEvent>> {
+        event_sender.send(AppEvent::SetStatusMessage(Some("NOR".into())))?;
+
+        Ok(Self {
             current_mode: Mode::Normal,
-        }
+        })
     }
 
     fn up(
@@ -29,8 +29,7 @@ impl HelixMotions {
         buffer: &mut Buffer,
         event_sender: &UnboundedSender<AppEvent>,
     ) -> Result<(), SendError<AppEvent>> {
-        let line = buffer.current_cursor_position_line();
-        buffer.set_cursor_position_saturating(line.saturating_sub(1), self.cursor_optimal_column);
+        buffer.cursor_up();
         event_sender.send(buffer.full_info_to_app_event())
     }
 
@@ -39,8 +38,7 @@ impl HelixMotions {
         buffer: &mut Buffer,
         event_sender: &UnboundedSender<AppEvent>,
     ) -> Result<(), SendError<AppEvent>> {
-        let line = buffer.current_cursor_position_line();
-        buffer.set_cursor_position_saturating(line + 1, self.cursor_optimal_column);
+        buffer.cursor_down();
         event_sender.send(buffer.full_info_to_app_event())
     }
 
@@ -50,7 +48,6 @@ impl HelixMotions {
         event_sender: &UnboundedSender<AppEvent>,
     ) -> Result<(), SendError<AppEvent>> {
         buffer.cursor_backward();
-        self.cursor_optimal_column = buffer.current_cursor_position_column();
         event_sender.send(buffer.full_info_to_app_event())
     }
 
@@ -60,7 +57,6 @@ impl HelixMotions {
         event_sender: &UnboundedSender<AppEvent>,
     ) -> Result<(), SendError<AppEvent>> {
         buffer.cursor_forward();
-        self.cursor_optimal_column = buffer.current_cursor_position_column();
         event_sender.send(buffer.full_info_to_app_event())
     }
 
@@ -79,7 +75,7 @@ impl HelixMotions {
             Key::Char('l') | Key::Char(' ') => self.right(buffer, event_sender),
             Key::Char('i') => {
                 self.current_mode = Mode::Insert;
-                Ok(())
+                event_sender.send(AppEvent::SetStatusMessage(Some("INS".into())))
             }
             Key::Char('w') => {
                 buffer.cursor_seek_next_word_start(false);
@@ -104,6 +100,7 @@ impl HelixMotions {
         match key {
             Key::Named(KeyNamed::Escape) => {
                 self.current_mode = Mode::Normal;
+                event_sender.send(AppEvent::SetStatusMessage(Some("NOR".into())))?;
             }
             Key::Named(KeyNamed::Backspace) => {
                 buffer.remove_char();

@@ -1,5 +1,7 @@
 //! Types for communication between the app and the frontend
 
+use std::borrow::Cow;
+
 use ropey::Rope;
 
 /// An event emitted by the frontend.
@@ -53,10 +55,18 @@ pub enum KeyNamed {
 #[derive(Debug, Clone)]
 pub enum AppEvent {
     HintBufferViewLoading,
-    SetBufferView { contents: Rope, title: String },
+    SetBufferView {
+        contents: Rope,
+        title: String,
+    },
     SetBufferViewContents(Rope),
-    SetBufferViewCursorPosition { line: usize, column: usize },
+    SetBufferViewCursorPosition {
+        line: usize,
+        column: usize,
+    },
     Batched(Vec<AppEvent>),
-    // TODO allow core to request program termination?
-    // RequestExit,
+    /// A preferably short status message. This is usually used for the current
+    /// mode when modal editing is enabled.
+    SetStatusMessage(Option<Cow<'static, str>>),
+    // TODO allow core to request program termination? RequestExit,
 }

@@ -62,6 +62,7 @@
               rust-analyzer
               cargo-expand
               cargo-show-asm
+              cargo-outdated
             ];
 
             env = [

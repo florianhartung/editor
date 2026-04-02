@@ -14,8 +14,8 @@ tokio = { workspace = true, features = ["rt"] }
 tokio-stream.workspace = true
 
 tokio-executor = "0.1.10"
-ratatui = "0.29.0"
+ratatui = "0.30.0"
 pollster = "0.4.0"
-crossterm = { version = "0.28.1", features = ["event-stream"] }
-env_logger = "0.11"
+crossterm = { version = "0.29.0", features = ["event-stream"] }
+env_logger = "0.11.9"
 clap = { version = "4.5.54", features = ["derive"] }

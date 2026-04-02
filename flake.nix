@@ -61,6 +61,7 @@
               rust-toolchain
               rust-analyzer
               cargo-expand
+              cargo-show-asm
             ];
 
             env = [

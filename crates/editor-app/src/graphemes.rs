@@ -25,41 +25,15 @@ pub fn len_graphemes(rope: RopeSlice) -> usize {
     }
 }
 
-/// Returns the char index of the start of the next grapheme (or the current
-/// if the char index is not at the start already).
+/// Returns the char index of the start of the next grapheme.
 pub fn next_grapheme_boundary(rope: RopeSlice, char_idx: usize) -> usize {
     nth_next_grapheme_boundary(rope, char_idx, 1)
 }
 
 /// Returns the char index of the start of the n-th next grapheme.
-///
-/// - The char index can be one-past-the-end.
-/// - The returned char index saturates at one-past-the-end.
-///
-/// For convenience, this returns the char_idx when n is 0.
-pub fn nth_next_grapheme_boundary(rope: RopeSlice, char_idx: usize, mut n: usize) -> usize {
-    let (mut cursor, mut chunk) = new_cursor_and_chunk(rope, char_idx);
-
-    if n == 0 {
-        return char_idx;
-    }
-    n -= 1;
-
-    let grapheme_boundary_byte_idx = loop {
-        match cursor.next_boundary(chunk.0, chunk.1) {
-            Ok(Some(grapheme_boundary_byte_idx)) => {
-                if n == 0 {
-                    break grapheme_boundary_byte_idx;
-                }
-                n -= 1;
-            }
-            Ok(None) => return rope.len_chars(),
-            Err(grapheme_incomplete) => complete_grapheme(grapheme_incomplete, rope, &mut chunk),
-        }
-    };
-
-    // Convert byte index to char index efficiently because we have the chunk already
-    chunk.2 + byte_to_char_idx(chunk.0, grapheme_boundary_byte_idx - chunk.1)
+pub fn nth_next_grapheme_boundary(rope: RopeSlice, char_idx: usize, n: usize) -> usize {
+    let n = isize::try_from(n).expect("that n is usually small enough");
+    nth_grapheme_boundary(rope, char_idx, n)
 }
 
 /// Returns the char index of the start of the previous grapheme (or the current
@@ -70,28 +44,41 @@ pub fn prev_grapheme_boundary(rope: RopeSlice, char_idx: usize) -> usize {
 
 /// Returns the char index of the start of the n-th previous grapheme (or the
 /// current if the char index is not at the start already).
+pub fn nth_prev_grapheme_boundary(rope: RopeSlice, char_idx: usize, n: usize) -> usize {
+    let n = isize::try_from(n).expect("that n is usually small enough");
+    nth_grapheme_boundary(rope, char_idx, -n)
+}
+
+/// Returns the char index of the start of the n-th next or previous grapheme
+/// (depending on whether n is positive or negative).
 ///
 /// - The char index can be one-past-the-end.
-/// - The returned char index saturates at 0.
+/// - The returned char index saturates at one-past-the-end.
 ///
 /// For convenience, this returns the char_idx when n is 0.
-pub fn nth_prev_grapheme_boundary(rope: RopeSlice, char_idx: usize, mut n: usize) -> usize {
+pub fn nth_grapheme_boundary(rope: RopeSlice, char_idx: usize, mut n: isize) -> usize {
     let (mut cursor, mut chunk) = new_cursor_and_chunk(rope, char_idx);
 
     if n == 0 {
         return char_idx;
     }
-    n -= 1;
+    let signum = n.signum();
+    n -= signum;
+    let boundary_fn = if signum > 0 {
+        GraphemeCursor::next_boundary
+    } else {
+        GraphemeCursor::prev_boundary
+    };
 
     let grapheme_boundary_byte_idx = loop {
-        match cursor.prev_boundary(chunk.0, chunk.1) {
+        match boundary_fn(&mut cursor, chunk.0, chunk.1) {
             Ok(Some(grapheme_boundary_byte_idx)) => {
                 if n == 0 {
                     break grapheme_boundary_byte_idx;
                 }
-                n -= 1;
+                n -= signum;
             }
-            Ok(None) => return 0,
+            Ok(None) => return if signum > 0 { rope.len_chars() } else { 0 },
             Err(grapheme_incomplete) => complete_grapheme(grapheme_incomplete, rope, &mut chunk),
         }
     };

@@ -124,6 +124,7 @@ impl Buffer {
         ])
     }
 
+    // TODO maybe use unicode width instead of number of graphemes?
     pub fn cursor_up(&mut self) {
         let line_idx = self.rope.char_to_line(self.cursor_char_idx);
         if line_idx == 0 {
@@ -136,6 +137,7 @@ impl Buffer {
         self.move_to_preferred_column_in_line(prev_line_char_idx);
     }
 
+    // TODO maybe use unicode width instead of number of graphemes?
     pub fn cursor_down(&mut self) {
         let line_idx = self.rope.char_to_line(self.cursor_char_idx);
         if line_idx == self.rope.len_lines() {

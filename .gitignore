@@ -3,3 +3,6 @@ target/
 
 # My notes
 *.local.*
+
+# Strictdoc Web Server
+output/server/

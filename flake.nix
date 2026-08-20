@@ -63,6 +63,8 @@
               cargo-expand
               cargo-show-asm
               cargo-outdated
+
+              strictdoc
             ];
 
             env = [

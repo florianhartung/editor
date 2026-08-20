@@ -2,7 +2,7 @@ use ropey::Rope;
 
 use editor_core::communication::AppEvent;
 
-use crate::graphemes;
+use crate::util::{graphemes, words};
 
 /// A buffer is the in-memory representation of a document providing operations
 /// on a per-grapheme or per-char granularity.
@@ -89,24 +89,21 @@ impl Buffer {
         self.rope.char_to_line(self.cursor_char_idx)
     }
 
-    pub fn cursor_seek_next_word_start(&mut self, include_punctuation_in_words: bool) {
-        let chars_from_cursor = self.rope.chars_at(self.cursor_char_idx);
-        let num_chars_to_skip = chars_from_cursor
-            .skip(1)
-            .scan(false, |found_whitespace, next| {
-                *found_whitespace |= next.is_whitespace()
-                    | (!include_punctuation_in_words && next.is_ascii_punctuation());
+    pub fn cursor_seek_next_word_start(&mut self, only_whitespaces_as_boundaries: bool) {
+        let full_rope = self.rope.slice(..);
 
-                match (found_whitespace, next.is_whitespace()) {
-                    (true, true) => Some(next),
-                    (true, false) => None,
-                    (false, _) => Some(next),
-                }
-            })
-            .count();
+        let new_cursor_char_idx = if only_whitespaces_as_boundaries {
+            words::next_whitespace_word_boundary(full_rope, self.cursor_char_idx)
+        } else {
+            words::next_word_boundary(full_rope, self.cursor_char_idx)
+        };
 
-        let new_cursor_position = self.cursor_char_idx + num_chars_to_skip;
-        self.cursor_char_idx = new_cursor_position.min(self.rope.len_chars());
+        self.cursor_char_idx = new_cursor_char_idx;
+    }
+
+    pub fn cursor_seek_previous_word_start(&mut self) {
+        self.cursor_char_idx =
+            words::previous_word_boundary(self.rope.slice(..), self.cursor_char_idx);
     }
 
     pub fn insert_new_line(&mut self) {

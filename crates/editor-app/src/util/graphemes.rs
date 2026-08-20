@@ -126,7 +126,7 @@ fn complete_grapheme<'a>(
 mod tests {
     use ropey::Rope;
 
-    use crate::graphemes::{
+    use super::{
         len_graphemes, next_grapheme_boundary, nth_next_grapheme_boundary,
         nth_prev_grapheme_boundary, prev_grapheme_boundary,
     };

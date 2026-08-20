@@ -23,8 +23,8 @@ use crate::{
 };
 
 mod buffer;
-mod graphemes;
 mod motions;
+mod util;
 
 #[tokio::main]
 pub async fn run<F: Frontend>(post_init: impl FnOnce(&FrontendEventSender)) -> Result<()> {

@@ -1,0 +1,36 @@
+[DOCUMENT]
+TITLE: High-Level Requirements Specification
+PREFIX: HLR-
+
+[REQUIREMENT]
+UID: HLR-1
+TITLE: Positional Keymaps
+STATEMENT: >>>
+The editor shall support positional keymaps, i.e. keys mapped based solely on their position.
+<<<
+RATIONALE: >>>
+Positional keymaps have their pros and cons.
+
+**Pros**
+
+- Bigrams can be optimized better
+
+**Cons**
+
+- More complex
+- Harder to exchange common keybindings between users
+<<<
+COMMENT: >>>
+https://ki-editor.org/docs/core-concepts/#2-positional-keymaps
+<<<
+COMMENT: >>>
+TODO: Add positional coherence & travel distance optimization
+<<<
+
+[TEXT]
+STATEMENT: >>>
+- orthogonal bindings, as child of intuitive design
+- transparent configuration format, child of intuitive
+- in-editor keybinds cheatsheets, child of intuitive
+- (derived requirement?) correctness: font rendering, unicode handling, etc.
+<<<

@@ -1,0 +1,284 @@
+[DOCUMENT]
+TITLE: System Requirements Specification
+PREFIX: SYS-
+
+[TEXT]
+STATEMENT: >>>
+This document specifies system requirements, the highest level of requirements. They describe what the system must or shall do, not how.
+<<<
+
+[[SECTION]]
+TITLE: Editing
+
+[REQUIREMENT]
+UID: SYS-1
+TITLE: Editing Text
+STATEMENT: >>>
+The editor must provide a way to edit text.
+<<<
+RATIONALE: >>>
+For a text editor, editing is the main task. This usually involves viewing, adding, modifying or deleting information in a text.
+<<<
+
+[REQUIREMENT]
+UID: SYS-2
+TITLE: Multiple Editor Motions
+STATEMENT: >>>
+The editor must provide multiple motions. A motion defines the primary means by which a user interacts with the editor. At least the following motions must be included:
+
+- Vim motions (most common behaviors shall be matched)
+- Non-modal motions
+<<<
+RATIONALE: >>>
+Many motions already exist such as vim, helix, kakoune or non-modal motions.
+Limiting an editor to only a single motion steepens the learning curve for new users, possibly acting as a disincentive to use the editor at all.
+
+Vim motions are chosen because they are the gold standard under all avaiable modal motions. Non-modal motions on the other hand are used by the majority of users.
+<<<
+
+[REQUIREMENT]
+UID: SYS-8
+TITLE: Multi-Cursor Support
+STATEMENT: >>>
+The editor must allow having multiple cursors at the same time.
+<<<
+RATIONALE: >>>
+Multiple cursors are a fundamental feature of many existing editors. When combined with other features such as modal editing or search & replace, they can be very powerful.
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: File I/O
+
+[REQUIREMENT]
+UID: SYS-3
+TITLE: Edit Files
+STATEMENT: >>>
+The editor must be able to edit text that is stored in files.
+<<<
+RATIONALE: >>>
+Users use files as the main storage unit for information.
+<<<
+
+[REQUIREMENT]
+UID: SYS-9
+TITLE: Watch Files
+STATEMENT: >>>
+The editor shall be able to watch opened files, i.e. react to external changes made to them, if supported by the OS.
+<<<
+RATIONALE: >>>
+Watching files is an essential feature when working with external tools such as code formatters.
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Development Integration
+
+[REQUIREMENT]
+UID: SYS-21
+TITLE: Text Highlighting
+STATEMENT: >>>
+The editor must highlight text appropriately.
+<<<
+RATIONALE: >>>
+For many programming or markup languages, text highlighting improves readability.
+<<<
+
+[REQUIREMENT]
+UID: SYS-22
+TITLE: Language Support
+STATEMENT: >>>
+The editor shall provide additional support for editing text that is in the form of specific programming languages.
+<<<
+RATIONALE: >>>
+Additional language support features such as auto-completion can improve development efficiency.
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Efficiency
+
+[REQUIREMENT]
+UID: SYS-4
+TITLE: Fast
+STATEMENT: >>>
+The editor shall be fast for general usage patterns, i.e. the user shall not perceive any loading times or freezes.
+<<<
+RATIONALE: >>>
+Fast software is proven to improve user satisfaction. Especially for a text editor, loading times slow down the user's productivity.
+<<<
+
+[REQUIREMENT]
+UID: SYS-5
+TITLE: Low Resource Footprint
+STATEMENT: >>>
+The editor shall not put unnecessary resource strain on the user's device.
+<<<
+RATIONALE: >>>
+Better resource usage allows the editor to run on resource-constrained devices, while also improving scalability on all devices.
+<<<
+
+[REQUIREMENT]
+UID: SYS-10
+TITLE: Fast Start Up
+STATEMENT: >>>
+The editor shall be fast to start.
+<<<
+RATIONALE: >>>
+Editors are used differently, depending on the user and the use case.
+Sometimes the editor is opened at the beginning of a development session and only closed at the end of the session. Other times the editor might be opened from a shell repeatedly, with the user closing the editor temporarily to re-gain access the shell.
+A fast start up time is important in all scenarios.
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Flexibility
+
+[REQUIREMENT]
+UID: SYS-6
+TITLE: Extensive Configuration Options
+STATEMENT: >>>
+Features of the editor shall be configurable by the user, in order to suit the user's individual needs.
+<<<
+RATIONALE: >>>
+Although a sensible default configuration is very important, all users have different needs for their editor. Providing extensive configuration options benefits all users regardless of their preferences.
+<<<
+
+[REQUIREMENT]
+UID: SYS-7
+TITLE: Extensibility
+STATEMENT: >>>
+The editor's behavior shall be extensible, so that new behaviors can be added on top of the editor itself without major effort.
+<<<
+RATIONALE: >>>
+Configuration options as described in SYS-6 allow the user to change existing features, however some users may require completely new features. While some new features can be integrated into the editor itself, others might only live on top of the editor. Therefore, the editor shall provide means to extend it with new features.
+<<<
+COMMENT: >>>
+TODO https://github.com/mawww/kakoune/blob/master/doc/design.asciidoc - Composability
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Accessibility
+
+[REQUIREMENT]
+UID: SYS-11
+TITLE: Intuitive
+STATEMENT: >>>
+The editor shall be intuitive to use.
+<<<
+RATIONALE: >>>
+An intuitive design is more welcoming for new users.
+<<<
+
+[REQUIREMENT]
+UID: SYS-12
+TITLE: No Input Method Prioritization
+STATEMENT: >>>
+By default, the editor shall not prioritize support for any input method over the others for non-text functionality (i.e. interaction with UI elements). All relevant input methods are:
+
+- keyboard
+- mouse/touchpad
+<<<
+RATIONALE: >>>
+While the keyboard is the primary input method for text, other forms of input are necessary: controlling the UI, opening menus, executing commands/actions. For these users have different preferences.
+<<<
+
+[REQUIREMENT]
+UID: SYS-16
+TITLE: Consistency
+STATEMENT: >>>
+The editor shall be consistent. Some examples are its behavior, UI or UX.
+<<<
+RATIONALE: >>>
+Consistency allows the user to better reason about and predict the editor's behavior.
+<<<
+
+[REQUIREMENT]
+UID: SYS-18
+TITLE: Portability
+STATEMENT: >>>
+The editor shall be able to run on multiple platforms, e.g. as a Linux/Windows desktop program or a web app.
+<<<
+RATIONALE: >>>
+The more platforms can be supported, the larger is the target group of potential users. Of course this comes at the cost of additional complexity.
+<<<
+COMMENT: >>>
+TODO: Move this somewhere else? It does not really fit into the Accessibility section.
+<<<
+
+[REQUIREMENT]
+UID: SYS-20
+TITLE: Discoverability
+STATEMENT: >>>
+Features shall be discoverable from within the editor.
+<<<
+RATIONALE: >>>
+While a user manual is still of importance, users should not be required to invest a disproportionate amount of time into reading it first. Rather, the editor shall support the user in their journey of continuous learning/improving.
+<<<
+COMMENT: >>>
+https://kakoune.org/why-kakoune/why-kakoune.html - Discoverability
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Reliability
+
+[REQUIREMENT]
+UID: SYS-19
+TITLE: No Data Loss
+STATEMENT: >>>
+The editor shall never be the reason for any kind of preventable data loss to occur.
+<<<
+RATIONALE: >>>
+Unreliable software is very frustrating to use, and might cause users to stop using that software.
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Aesthetic
+
+[REQUIREMENT]
+UID: SYS-17
+TITLE: Look Good
+STATEMENT: >>>
+The editor shall look good.
+<<<
+RATIONALE: >>>
+Users often look at their editors 8+ hours per day. Therefore, it should not look completely ugly.
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Licensing and Distribution
+
+[REQUIREMENT]
+UID: SYS-13
+TITLE: Open Source
+STATEMENT: >>>
+The editor must be licensed under an open source license.
+<<<
+
+[REQUIREMENT]
+UID: SYS-14
+TITLE: No Proprietary Dependencies
+STATEMENT: >>>
+The editor must not rely on any proprietary dependencies.
+<<<
+
+[REQUIREMENT]
+UID: SYS-15
+TITLE: Free
+STATEMENT: >>>
+The editor must be free. Free as in freedom, not free coffee.
+<<<
+
+[[/SECTION]]

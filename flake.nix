@@ -1,10 +1,13 @@
 {
-  description = "a minimal debugger written in Rust";
+  description = "just another text editor";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    devshell.url = "github:numtide/devshell";
+    devshell = {
+      url = "github:numtide/devshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     utils.url = "github:numtide/flake-utils";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -43,16 +46,17 @@
           ];
         };
         treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
-
+        makeFirstCharLowercase =
+          s:
+          (builtins.concatStringsSep "" [
+            (lib.toLower (builtins.substring 0 1 s))
+            (builtins.substring 1 (-1) s)
+          ]);
       in
       {
-        git.hooks = {
-          enable = true;
-          pre-commit.text = "nix flake check";
-        };
-
         devShells.default = (
           pkgs.devshell.mkShell {
+            imports = [ "${devshell}/extra/git/hooks.nix" ];
             name = "dev";
             packages = with pkgs; [
               stdenv.cc
@@ -67,26 +71,31 @@
               strictdoc
             ];
 
-            env = [
+            commands = [
               {
-                name = "LD_LIBRARY_PATH";
-                value =
-                  with pkgs;
-                  lib.makeLibraryPath [
-                    # https://eu90h.com/wgpu-winit-and-nixos.html
-
-                    libGL
-                    libxkbcommon
-                    wayland
-                    vulkan-loader
-                  ];
+                package = treefmtEval.config.build.wrapper;
+                help = "${makeFirstCharLowercase treefmtEval.config.build.wrapper.meta.description} (same as: nix fmt)";
+                category = "formatter";
+              }
+              {
+                name = "strictdoc-server";
+                command = "strictdoc server docs";
+                help = "starts the strictdoc server for documentation editing";
+                category = "documentation";
               }
             ];
           }
         );
 
+        git.hooks = {
+          enable = true;
+          pre-commit.text = "nix flake check";
+        };
+
+        # Run with `nix fmt`
         formatter = treefmtEval.config.build.wrapper;
 
+        # Run all with `nix flake check`
         checks = {
           formatting = treefmtEval.config.build.check self;
         };

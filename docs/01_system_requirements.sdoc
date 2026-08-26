@@ -22,18 +22,22 @@ For a text editor, editing is the main task. This usually involves viewing, addi
 
 [REQUIREMENT]
 UID: SYS-2
-TITLE: Multiple Editor Motions
+TITLE: Multiple Editor Motion Sets
 STATEMENT: >>>
-The editor must provide multiple motions. A motion defines the primary means by which a user interacts with the editor. At least the following motions must be included:
+The editor must provide multiple motion sets (or just: motions).
+
+DEFINITION: A motion set is defined as the pattern by which the user interacts with the editor through the keyboard specifically. It is similar to keybinds, however much less granular.
+
+At least the following motion sets must be included:
 
 - Vim motions (most common behaviors shall be matched)
 - Non-modal motions
 <<<
 RATIONALE: >>>
-Many motions already exist such as vim, helix, kakoune or non-modal motions.
-Limiting an editor to only a single motion steepens the learning curve for new users, possibly acting as a disincentive to use the editor at all.
+Many motion sets already exist, namely vim, helix, kakoune, non-modal motions, etc.
+Limiting an editor to only a single motion set steepens the learning curve for new users which are unfamiliar with that motion set. Thus possibly acting as a disincentive to use the editor at all to them.
 
-Vim motions are chosen because they are the gold standard under all avaiable modal motions. Non-modal motions on the other hand are used by the majority of users.
+Vim motions are chosen because they are the gold standard under all available modal motions. Non-modal motions on the other hand are used by the majority of users.
 <<<
 
 [REQUIREMENT]
@@ -164,7 +168,7 @@ TODO https://github.com/mawww/kakoune/blob/master/doc/design.asciidoc - Composab
 [[/SECTION]]
 
 [[SECTION]]
-TITLE: Accessibility
+TITLE: Usability/UX
 
 [REQUIREMENT]
 UID: SYS-11
@@ -187,6 +191,9 @@ By default, the editor shall not prioritize support for any input method over th
 <<<
 RATIONALE: >>>
 While the keyboard is the primary input method for text, other forms of input are necessary: controlling the UI, opening menus, executing commands/actions. For these users have different preferences.
+<<<
+COMMENT: >>>
+TODO: This is somewhat missing the point of accessibility. For example, some users might rely on their voice for text inputs.
 <<<
 
 [REQUIREMENT]
@@ -253,6 +260,21 @@ The editor shall look good.
 <<<
 RATIONALE: >>>
 Users often look at their editors 8+ hours per day. Therefore, it should not look completely ugly.
+<<<
+
+[[/SECTION]]
+
+[[SECTION]]
+TITLE: Accessibility
+
+[REQUIREMENT]
+UID: SYS-23
+TITLE: Accessible For Everyone
+STATEMENT: >>>
+The editor shall be accessible for everyone, regardless of disabilities or similar impairments.
+<<<
+RATIONALE: >>>
+Some users with disabilities require special features, for the editor to be useful at all. Some examples could be screen readers or voice input methods. For an editor to be inclusive, these users shall not be disregarded.
 <<<
 
 [[/SECTION]]

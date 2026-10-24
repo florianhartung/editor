@@ -2,6 +2,55 @@
 TITLE: High-Level Requirements Specification
 PREFIX: HLR-
 
+[GRAMMAR]
+ELEMENTS:
+- TAG: SECTION
+  PROPERTIES:
+    IS_COMPOSITE: True
+  FIELDS:
+  - TITLE: UID
+    TYPE: String
+    REQUIRED: False
+  - TITLE: LEVEL
+    TYPE: String
+    REQUIRED: False
+  - TITLE: PREFIX
+    TYPE: String
+    REQUIRED: False
+  - TITLE: TITLE
+    TYPE: String
+    REQUIRED: True
+- TAG: TEXT
+  FIELDS:
+  - TITLE: UID
+    TYPE: String
+    REQUIRED: False
+  - TITLE: STATEMENT
+    TYPE: String
+    REQUIRED: True
+- TAG: REQUIREMENT
+  PROPERTIES:
+    VIEW_STYLE: Table
+  FIELDS:
+  - TITLE: UID
+    TYPE: String
+    REQUIRED: False
+  - TITLE: TITLE
+    TYPE: String
+    REQUIRED: False
+  - TITLE: STATEMENT
+    TYPE: String
+    REQUIRED: False
+  - TITLE: RATIONALE
+    TYPE: String
+    REQUIRED: False
+  - TITLE: COMMENT
+    TYPE: String
+    REQUIRED: False
+  RELATIONS:
+  - TYPE: Parent
+  - TYPE: File
+
 [REQUIREMENT]
 UID: HLR-1
 TITLE: Positional Keymaps
@@ -26,6 +75,29 @@ https://ki-editor.org/docs/core-concepts/#2-positional-keymaps
 COMMENT: >>>
 TODO: Add positional coherence & travel distance optimization
 <<<
+
+[REQUIREMENT]
+UID: HLR-2
+TITLE: Orthogonality
+RELATIONS:
+- TYPE: Parent
+  VALUE: SYS-11
+- TYPE: Parent
+  VALUE: SYS-16
+- TYPE: Parent
+  VALUE: SYS-20
+
+[REQUIREMENT]
+UID: HLR-3
+TITLE: Correct Text Manipulation
+STATEMENT: >>>
+Text manipulation operations shall use the Unicode Standard for the definitions of graphemes and words.
+<<<
+RELATIONS:
+- TYPE: Parent
+  VALUE: SYS-1
+- TYPE: Parent
+  VALUE: SYS-16
 
 [TEXT]
 STATEMENT: >>>

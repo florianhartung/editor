@@ -2,6 +2,64 @@
 TITLE: System Requirements Specification
 PREFIX: SYS-
 
+[GRAMMAR]
+ELEMENTS:
+- TAG: SECTION
+  PROPERTIES:
+    IS_COMPOSITE: True
+  FIELDS:
+  - TITLE: UID
+    TYPE: String
+    REQUIRED: False
+  - TITLE: LEVEL
+    TYPE: String
+    REQUIRED: False
+  - TITLE: PREFIX
+    TYPE: String
+    REQUIRED: False
+  - TITLE: TITLE
+    TYPE: String
+    REQUIRED: True
+- TAG: TEXT
+  FIELDS:
+  - TITLE: UID
+    TYPE: String
+    REQUIRED: False
+  - TITLE: STATEMENT
+    TYPE: String
+    REQUIRED: True
+- TAG: REQUIREMENT
+  PROPERTIES:
+    VIEW_STYLE: Table
+  FIELDS:
+  - TITLE: UID
+    TYPE: String
+    REQUIRED: False
+  - TITLE: LEVEL
+    TYPE: String
+    REQUIRED: False
+  - TITLE: STATUS
+    TYPE: String
+    REQUIRED: False
+  - TITLE: TAGS
+    TYPE: String
+    REQUIRED: False
+  - TITLE: TITLE
+    TYPE: String
+    REQUIRED: False
+  - TITLE: STATEMENT
+    TYPE: String
+    REQUIRED: False
+  - TITLE: RATIONALE
+    TYPE: String
+    REQUIRED: False
+  - TITLE: COMMENT
+    TYPE: String
+    REQUIRED: False
+  RELATIONS:
+  - TYPE: Parent
+  - TYPE: File
+
 [TEXT]
 STATEMENT: >>>
 This document specifies system requirements, the highest level of requirements. They describe what the system must or shall do, not how.
@@ -156,10 +214,10 @@ Although a sensible default configuration is very important, all users have diff
 UID: SYS-7
 TITLE: Extensibility
 STATEMENT: >>>
-The editor's behavior shall be extensible, so that new behaviors can be added on top of the editor itself without major effort.
+The editor's behavior shall be extensible, so that new features can be added on top of the editor without major effort.
 <<<
 RATIONALE: >>>
-Configuration options as described in SYS-6 allow the user to change existing features, however some users may require completely new features. While some new features can be integrated into the editor itself, others might only live on top of the editor. Therefore, the editor shall provide means to extend it with new features.
+Configuration options as described in [LINK: SYS-6] allow the user to change existing features, however some users may require completely new features. While some new features can be integrated into the editor itself, others might only live on top of the editor. Therefore, the editor shall provide means to extend it with new features.
 <<<
 COMMENT: >>>
 TODO https://github.com/mawww/kakoune/blob/master/doc/design.asciidoc - Composability
@@ -200,7 +258,7 @@ TODO: This is somewhat missing the point of accessibility. For example, some use
 UID: SYS-16
 TITLE: Consistency
 STATEMENT: >>>
-The editor shall be consistent. Some examples are its behavior, UI or UX.
+The editor shall be consistent, thereby also improving its predictability. Some examples are its behavior, UI or UX.
 <<<
 RATIONALE: >>>
 Consistency allows the user to better reason about and predict the editor's behavior.
@@ -213,7 +271,7 @@ STATEMENT: >>>
 The editor shall be able to run on multiple platforms, e.g. as a Linux/Windows desktop program or a web app.
 <<<
 RATIONALE: >>>
-The more platforms can be supported, the larger is the target group of potential users. Of course this comes at the cost of additional complexity.
+The more platforms can be supported, the larger is the target group of potential users. Additional complexity is expected.
 <<<
 COMMENT: >>>
 TODO: Move this somewhere else? It does not really fit into the Accessibility section.
@@ -283,13 +341,6 @@ Some users with disabilities require special features, for the editor to be usef
 TITLE: Licensing and Distribution
 
 [REQUIREMENT]
-UID: SYS-13
-TITLE: Open Source
-STATEMENT: >>>
-The editor must be licensed under an open source license, preferably a copyleft license to ensure that derivative works remain free (see [LINK: SYS-15]).
-<<<
-
-[REQUIREMENT]
 UID: SYS-15
 TITLE: Free
 STATEMENT: >>>
@@ -304,8 +355,14 @@ The Free Software Foundation (FSF) defines four essential freedoms. All of them 
 
 FSF freedoms: https://www.gnu.org/philosophy/free-sw.html
 <<<
-RATIONALE: >>>
-Free software has various benefits, which are not further explained here. See above link to the FSF for more information.
+
+[REQUIREMENT]
+UID: SYS-24
+TITLE: Copyleft
+STATEMENT: >>>
+The editor must use a license that copylefts it.
+
+Refer to the FSF/GNU for definitions and further information: https://www.gnu.org/licenses/copyleft.en.html
 <<<
 
 [[/SECTION]]

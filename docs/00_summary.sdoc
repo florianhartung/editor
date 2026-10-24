@@ -8,13 +8,14 @@ This document summaries the user needs for the editor.
 
 The editor's primary purpose is editing of text files, specifically source code but also markup languages.
 
-The editor is aimed at a broad target group, providing various configuration options to suit the user's needs. While an opinionated default configuration is available, power-users can benefit from extensive extensibility options, including a plugin system. All features follow the principle of being intuitive to use, lowering the entry barrier for users to optimize their workflow e.g. by trying out new features.
+The editor is aimed at a broad target group, providing various configuration options to suit the user's needs. While an opinionated default configuration is available, power-users can benefit from extensive extensibility options, including a plugin system. All features follow the principle of being intuitive to use, incentivizing users to incrementally optimize their workflow.
 <<<
 
 [TEXT]
 STATEMENT: >>>
 Collection of references for future stuff
 
-- https://github.com/swiboe/swiboe
+- https://www.sirver.net/blog/2015/08/04/the-ideal-text-editor/
+- https://github.com/swiboe/swiboe / http://www.sirver.net/blog/2015/08/21/design-for-the-ideal-text-editor./
 - https://github.com/xi-editor/xi-editor / https://xi-editor.io/docs
 <<<

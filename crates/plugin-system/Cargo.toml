@@ -1,0 +1,10 @@
+[package]
+name = "plugin-system"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow.workspace = true
+ropey.workspace = true
+
+tokio = { workspace = true, features = ["rt", "sync", "macros", "rt-multi-thread", "time"] }

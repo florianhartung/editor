@@ -4,11 +4,13 @@ members = [
   "crates/editor-app",
   # "crates/frontend-gui",
   "crates/frontend-tui",
+  "crates/plugin-system",
 ]
 default-members = [
   "crates/editor-core",
   "crates/editor-app",
   "crates/frontend-tui",
+  "crates/plugin-system",
 ]
 resolver = "3"
 

@@ -274,8 +274,10 @@ mod tests {
         let mut plugin_system = PluginSystem::default();
         plugin_system.spawn(BufferStore::plugin_entry_point);
 
+        // Wait a bit so everything is properly initialized
         tokio::time::sleep(Duration::from_secs(1)).await;
 
+        // Install broadcast logger for debugging after
         plugin_system
             .0
             .lock()
@@ -292,17 +294,15 @@ mod tests {
                 });
             });
 
-        loop {
-            let x = plugin_system
-                .call("buffer.new", Value::Str("hello.txt".to_owned()))
-                .await;
+        let x = plugin_system
+            .call("buffer.new", Value::Str("hello.txt".to_owned()))
+            .await;
 
-            if x.is_ok() {
-                println!("Success");
-                break;
-            }
-        }
+        assert!(x.is_ok());
 
-        tokio::time::sleep(Duration::from_secs(3)).await;
+        // Wait for the broadcast to come in
+        tokio::time::sleep(Duration::from_secs(1)).await;
+
+        println!("Sucess");
     }
 }
